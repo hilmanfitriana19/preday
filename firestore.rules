@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && 
+             exists(/databases/$(database)/documents/users/$(request.auth.token.email)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.role == 'admin';
+    }
+
+    // Function to get user's chat_id from their profile
+    function getUserChatId() {
+      return get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.chat_id;
+    }
+
+
+    
+    // Users Collection Rules
+    match /users/{userId} {
+      // User can read their own profile, Admin can read/write all
+      allow read: if request.auth != null && (request.auth.token.email == userId || isAdmin());
+      // Only admin can create or modify roles
+      allow write: if isAdmin();
+    }
+    
+    // Reminders Collection Rules
+    match /reminders/{reminderId} {
+      // User can read/write if their chat_id matches the reminder's chat_id
+      allow read, write: if request.auth != null && (
+        isAdmin() || 
+        (exists(/databases/$(database)/documents/users/$(request.auth.token.email)) && 
+         getUserChatId() == resource.data.chat_id)
+      );
+      
+      // For create operations, validate the incoming data
+      allow create: if request.auth != null && (
+        isAdmin() || 
+        (exists(/databases/$(database)/documents/users/$(request.auth.token.email)) && 
+         getUserChatId() == request.resource.data.chat_id)
+      );
+    }
+  }
+}
