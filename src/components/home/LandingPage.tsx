@@ -97,6 +97,7 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
 
             <Button 
               aria-label={user ? "Go to your dashboard" : "Get started with PredaY"}
+              onClick={onLoginClick}
               className={cn(
                 "bg-primary hover:bg-primary/90 text-white shadow-lg px-6 rounded-xl hidden sm:flex transition-all",
                 isDark ? "shadow-primary/25" : "shadow-primary/20 hover:-translate-y-0.5"
@@ -160,7 +161,7 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
                 isDark ? "bg-primary/20" : "bg-primary/10"
               )} />
               <Image 
-                src="/landing/telegram_hero.png" 
+                src="/preday/landing/telegram_hero.png" 
                 alt="3D Telegram Icon" 
                 fill 
                 className={cn(

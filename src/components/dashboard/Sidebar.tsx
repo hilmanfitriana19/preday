@@ -1,6 +1,7 @@
 'use client';
 
-import { LayoutDashboard, History, User, Send } from 'lucide-react';
+import { LayoutDashboard, History, User } from 'lucide-react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 interface SidebarProps {
@@ -18,8 +19,14 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
   return (
     <aside className="w-64 border-r border-border bg-sidebar h-screen sticky top-0 flex flex-col transition-colors duration-300">
       <div className="p-6 flex items-center gap-3">
-        <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-          <Send className="h-6 w-6 text-primary-foreground" />
+        <div className="h-10 w-10 flex items-center justify-center">
+          <Image 
+            src="/preday/logo.png" 
+            alt="PredaY Logo" 
+            width={40} 
+            height={40} 
+            className="object-contain"
+          />
         </div>
         <span className="font-bold text-lg tracking-tight text-foreground transition-colors px-1">PredaY</span>
       </div>
@@ -48,15 +55,6 @@ export function Sidebar({ activeView, onViewChange }: SidebarProps) {
         ))}
       </nav>
 
-      <div className="p-6 border-t border-border">
-        <div className="bg-muted p-4 rounded-xl border border-border">
-          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-2">Pro Plan</p>
-          <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
-            <div className="h-full w-3/4 bg-primary rounded-full" />
-          </div>
-          <p className="text-[10px] text-muted-foreground mt-2">75% of alerts used</p>
-        </div>
-      </div>
     </aside>
   );
 }
