@@ -9,6 +9,7 @@ import { Moon, Sun, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 import { CreateReminderDialog } from '@/components/dashboard/CreateReminderDialog';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 export default function Header() {
   const { setTheme, resolvedTheme } = useTheme();
@@ -16,7 +17,10 @@ export default function Header() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleLogout = async () => {
@@ -32,8 +36,19 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-xl border-b border-border transition-colors duration-300">
       <div className="flex h-20 items-center justify-between px-8">
-        <div className="font-bold text-2xl tracking-tight text-foreground">
-          PredaY
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 flex items-center justify-center">
+            <Image 
+              src="/preday/logo.png" 
+              alt="PredaY Logo" 
+              width={40} 
+              height={40} 
+              className="object-contain"
+            />
+          </div>
+          <span className="font-bold text-2xl tracking-tight text-foreground">
+            PredaY
+          </span>
         </div>
         <div className="flex items-center gap-6">
           <CreateReminderDialog />

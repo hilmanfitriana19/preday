@@ -42,6 +42,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/preday",
   },
+  icons: {
+    icon: "/preday/logo.png",
+    apple: "/preday/logo.png",
+  },
   robots: {
     index: true,
     follow: true,

@@ -50,11 +50,17 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
         isDark ? "border-white/5 bg-[#0B0B0C]/80" : "border-zinc-200 bg-white/80"
       )}>
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between px-8">
-          <div className="font-bold text-xl tracking-tighter flex items-center gap-2.5">
-            <div className="h-9 w-9 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-              <Send className="h-5 w-5 text-white" />
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 flex items-center justify-center">
+              <Image 
+                src="/preday/logo.png" 
+                alt="PredaY Logo" 
+                width={40} 
+                height={40} 
+                className="object-contain"
+              />
             </div>
-            <span className={isDark ? "text-white" : "text-[#1E293B]"}>PredaY</span>
+            <span className={cn("font-bold text-xl tracking-tighter", isDark ? "text-white" : "text-[#1E293B]")}>PredaY</span>
           </div>
           <div className="flex items-center gap-4">
             <Button 
@@ -418,11 +424,17 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
         isDark ? "border-white/5" : "border-zinc-200"
       )}>
         <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="font-bold text-lg tracking-tighter flex items-center gap-2">
-            <div className="h-7 w-7 bg-primary rounded-lg flex items-center justify-center">
-              <Send className="h-4 w-4 text-white" />
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 flex items-center justify-center">
+              <Image 
+                src="/preday/logo.png" 
+                alt="PredaY Logo" 
+                width={32} 
+                height={32} 
+                className="object-contain opacity-80"
+              />
             </div>
-            <span className={isDark ? "text-white" : "text-[#1E293B]"}>PredaY</span>
+            <span className={isDark ? "text-white" : "text-[#1E293B] font-bold text-lg tracking-tighter"}>PredaY</span>
           </div>
           <div className="flex items-center gap-8 text-sm font-medium">
             {[ 'Privacy', 'Terms', 'Contact' ].map((link) => (
