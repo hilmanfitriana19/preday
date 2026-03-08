@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PredaY | The H-1 Buffer 🚀
 
-## Getting Started
+**PredaY** is a premium, centralized control center for Telegram alerts. Designed for power users who rely on automation (n8n/Firebase) to organize their life and never let a deadline "slip away."
 
-First, run the development server:
+Deployed at: [hyhilman.web.id/preday](https://hyhilman.web.id/preday)
+
+---
+
+## ✨ Key Features
+
+- **🎯 Precision Buffering**: Automatically calculates alert times (H-3 for Bills, H-1 for others) while preserving the literal `event_date`.
+- **💎 Premium UX/UI**: High-contrast automation dashboard with seamless Dark/Light mode, glowing interactive toggles, and bento-style layouts.
+- **🤖 AI-SEO Optimized**: Fully discoverable by AI search engines (Google SGE, Perplexity) via JSON-LD Structured Data, OpenGraph metadata, and dynamic sitemaps.
+- **🛡️ Secure Auth**: Google-only authentication for a simplified and secure entry point.
+- **📡 Subpath Ready**: Optimized for shared hosting/subpath deployment (`/preday`).
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 15+](https://nextjs.org/) (App Router)
+- **Database**: [Firebase / Firestore](https://firebase.google.com/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Components**: [Shadcn UI](https://ui.shadcn.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Validation**: [Zod](https://zod.dev/) & [React Hook Form](https://react-hook-form.com/)
+
+---
+
+## 🚀 Upcoming Improvements: Recurring Reminders (`repeat_type`)
+
+The next major evolution for PredaY is the implementation of **Recurring Reminders**. This will allow the system to handle monthly bills, weekly meetings, and yearly anniversaries automatically.
+
+### Proposed Implementation Area
+
+1. **Schema Update**:
+   - Add a `repeat_type` field to the `Reminder` model:
+     ```typescript
+     repeat_type: "none" | "daily" | "weekly" | "monthly" | "yearly";
+     ```
+
+2. **UI Integration**:
+   - Update `CreateReminderDialog` and `EditReminderDialog` to include a selection for repetition frequency.
+   - Refine the Dashboard to show a "Recurring" icon on list items.
+
+3. **Logic Layer**:
+   - Implement a post-processing hook in the backend/worker:
+     - When a reminder is marked as `is_sent: true`, if `repeat_type !== 'none'`, automatically calculate the next `event_date` and `scheduled_time`.
+     - Create a new "Pending" reminder document for the next cycle.
+
+4. **User Control**:
+   - Allow users to "Stop Series" directly from the dashboard actions.
+
+---
+
+## 🛠️ Getting Started
+
+First, install dependencies:
+
+```bash
+npm install
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000/preday](http://localhost:3000/preday) to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Created with ❤️ by Hilman.

@@ -4,40 +4,43 @@ service cloud.firestore {
     
     // Function to check if user is admin
     function isAdmin() {
-      return request.auth != null && 
-             exists(/databases/$(database)/documents/users/$(request.auth.token.email)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.role == 'admin';
+      return request.auth != null && (
+        (exists(/databases/$(database)/documents/users/$(request.auth.token.email)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.role == 'admin') ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
     }
 
     // Function to get user's chat_id from their profile
     function getUserChatId() {
-      return get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.chat_id;
+      let emailDoc = /databases/$(database)/documents/users/$(request.auth.token.email);
+      let uidDoc = /databases/$(database)/documents/users/$(request.auth.uid);
+      return exists(emailDoc) ? get(emailDoc).data.chat_id : (exists(uidDoc) ? get(uidDoc).data.chat_id : null);
     }
 
-
-    
     // Users Collection Rules
     match /users/{userId} {
       // User can read their own profile, Admin can read/write all
-      allow read: if request.auth != null && (request.auth.token.email == userId || isAdmin());
+      allow read: if request.auth != null && (request.auth.token.email == userId || request.auth.uid == userId || isAdmin());
       // Only admin can create or modify roles
-      allow write: if isAdmin();
+      allow create: if isAdmin();
+      // Users can update their own profile (e.g., chat_id) and delete it
+      allow update, delete: if request.auth != null && (request.auth.token.email == userId || request.auth.uid == userId || isAdmin());
     }
     
     // Reminders Collection Rules
     match /reminders/{reminderId} {
       // User can read/write if their chat_id matches the reminder's chat_id
-      allow read, write: if request.auth != null && (
+      allow read, update, delete: if request.auth != null && (
         isAdmin() || 
-        (exists(/databases/$(database)/documents/users/$(request.auth.token.email)) && 
-         getUserChatId() == resource.data.chat_id)
+        getUserChatId() == resource.data.chat_id
       );
       
       // For create operations, validate the incoming data
       allow create: if request.auth != null && (
         isAdmin() || 
-        (exists(/databases/$(database)/documents/users/$(request.auth.token.email)) && 
-         getUserChatId() == request.resource.data.chat_id)
+        getUserChatId() == request.resource.data.chat_id
       );
     }
   }

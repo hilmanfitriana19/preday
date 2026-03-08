@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -13,9 +13,10 @@ interface Reminder {
   id: string;
   chat_id: number;
   message: string;
-  scheduled_time: string;
+  scheduled_time: Timestamp | Date | string;
+  event_date?: Timestamp | Date | string | null;
   is_sent: boolean;
-  created_at: string;
+  created_at: Timestamp | Date | string;
 }
 
 export default function AdminDashboard() {
@@ -45,6 +46,19 @@ export default function AdminDashboard() {
   const pendingAlerts = reminders.filter(r => !r.is_sent).length;
   const sentAlerts = reminders.filter(r => r.is_sent).length;
   const uniqueUsers = new Set(reminders.map(r => r.chat_id)).size;
+
+  const formatDateValue = (val: Timestamp | Date | string | null | undefined, includeTime: boolean = true) => {
+    if (!val) return 'N/A';
+    let date: Date;
+    if (val instanceof Timestamp) {
+      date = val.toDate();
+    } else if (val instanceof Date) {
+      date = val;
+    } else {
+      date = new Date(val);
+    }
+    return isNaN(date.getTime()) ? 'Invalid' : format(date, includeTime ? 'PPp' : 'PP');
+  };
 
   return (
     <div className="space-y-6">
@@ -105,7 +119,14 @@ export default function AdminDashboard() {
                 <TableRow key={reminder.id}>
                   <TableCell className="font-mono">{reminder.chat_id}</TableCell>
                   <TableCell className="font-medium">{reminder.message}</TableCell>
-                  <TableCell>{format(new Date(reminder.scheduled_time), 'PPp')}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-xs font-bold">Alert: {formatDateValue(reminder.scheduled_time)}</span>
+                      {reminder.event_date && (
+                        <span className="text-[10px] text-muted-foreground">Event: {formatDateValue(reminder.event_date, false)}</span>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     {reminder.is_sent ? (
                       <Badge variant="outline" className="text-green-500 border-green-500">Sent</Badge>

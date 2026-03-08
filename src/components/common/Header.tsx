@@ -7,14 +7,22 @@ import { signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
+import { CreateReminderDialog } from '@/components/dashboard/CreateReminderDialog';
+import { useEffect, useState } from 'react';
 
 export default function Header() {
-  const { theme, setTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const { user } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      localStorage.removeItem('preday_view');
       toast.success('Logged out successfully');
     } catch {
       toast.error('Failed to log out');
@@ -22,33 +30,50 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center justify-between px-4">
-        <div className="font-bold text-lg tracking-tight">
-          Telegram Reminder Dashboard
+    <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-xl border-b border-border transition-colors duration-300">
+      <div className="flex h-20 items-center justify-between px-8">
+        <div className="font-bold text-2xl tracking-tight text-foreground">
+          PredaY
         </div>
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-          >
-            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Toggle theme</span>
-          </Button>
+        <div className="flex items-center gap-6">
+          <CreateReminderDialog />
           
-          {user && (
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground hidden sm:inline-block">
-                {user.email} ({user.role})
-              </span>
-              <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline-block">Logout</span>
+          <div className="h-8 w-px bg-border" />
+          
+          <div className="flex items-center gap-4">
+            {!mounted ? (
+              <div className="h-9 w-9" />
+            ) : (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-foreground hover:bg-accent"
+                onClick={() => setTheme(resolvedTheme === 'light' ? 'dark' : 'light')}
+              >
+                <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                <span className="sr-only">Toggle theme</span>
               </Button>
-            </div>
-          )}
+            )}
+            
+            {user && (
+              <div className="flex items-center gap-4 ml-2 pl-4 border-l border-border h-8">
+                <div className="flex flex-col items-end">
+                  <span className="text-[11px] font-bold text-foreground leading-tight">Logged in as</span>
+                  <span className="text-[11px] text-muted-foreground leading-tight">{user.email}</span>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={handleLogout} 
+                  className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9 w-9 rounded-lg transition-colors"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span className="sr-only">Logout</span>
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>
