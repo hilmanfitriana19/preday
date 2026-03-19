@@ -13,9 +13,13 @@ interface Reminder {
   id: string;
   chat_id: number;
   message: string;
+  category?: 'Personal' | 'Bill' | 'Work' | 'Urgent';
   scheduled_time: Timestamp | Date | string;
   event_date?: Timestamp | Date | string | null;
+  original_event_date?: Timestamp | Date | string | null;
+  repeat_type?: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
   is_sent: boolean;
+  is_active: boolean;
   created_at: Timestamp | Date | string;
 }
 

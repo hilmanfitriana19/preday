@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { BellPlus, Trash2, Edit2, AlertTriangle, Pause, Bell } from 'lucide-react';
+import { BellPlus, Trash2, Edit2, AlertTriangle, Pause, Bell, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -23,6 +23,8 @@ interface Reminder {
   category?: 'Personal' | 'Bill' | 'Work' | 'Urgent';
   scheduled_time: Timestamp | Date | string | null;
   event_date?: Timestamp | Date | string | null;
+  original_event_date?: Timestamp | Date | string | null;
+  repeat_type?: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
   is_sent: boolean;
   is_active: boolean;
   created_at?: Timestamp | Date | string;
@@ -86,9 +88,11 @@ export default function UserDashboard({ initialTab = 'upcoming', onTabChange }: 
   const cleanMessage = (msg: string) => {
     return msg
       .replace(/✅? ?Reminder set for \*\*/g, '')
+      .replace(/✅? ?Reminder: \*\*/g, '')
       .replace(/\*\*$/g, '')
       .replace(/\*\*/g, '')
       .split(/\. I will notify you on/i)[0]
+      .split(/\. Next alert:/i)[0]
       .trim();
   };
 
@@ -190,14 +194,11 @@ export default function UserDashboard({ initialTab = 'upcoming', onTabChange }: 
         scheduledDate = new Date(r.scheduled_time as string);
       }
 
-      // Logic Definitions:
-      // A. Ongoing: is_sent == false && scheduled_time > now
-      // (Shows both Active and Paused future alerts)
-      if (!r.is_sent && scheduledDate > now) {
+      const isUpcoming = !r.is_sent && r.is_active !== false && scheduledDate > now;
+
+      if (isUpcoming) {
         ongoing.push(r);
       } else {
-        // B. History: is_sent == true || (is_sent == false && scheduled_time < now)
-        // (Move to History only when truly "Done")
         history.push(r);
       }
     });
@@ -321,12 +322,17 @@ export default function UserDashboard({ initialTab = 'upcoming', onTabChange }: 
                       return (
                         <TableRow key={reminder.id} className="group border-b border-border/40 last:border-0 hover:bg-accent/5 dark:bg-[#1E1E1E]/50 dark:hover:bg-[#222223] transition-all h-24">
                           <TableCell className="px-8">
-                            <span 
-                              className="font-bold text-[15px] text-foreground dark:text-white block truncate max-w-[200px]" 
-                              title={cleanMessage(reminder.message)}
-                            >
-                              {cleanMessage(reminder.message)}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span 
+                                className="font-bold text-[15px] text-foreground dark:text-white block truncate max-w-[180px]" 
+                                title={cleanMessage(reminder.message)}
+                              >
+                                {cleanMessage(reminder.message)}
+                              </span>
+                              {reminder.repeat_type && reminder.repeat_type !== 'none' && (
+                                <RefreshCw className="h-3.5 w-3.5 text-[#0088CC] animate-spin-slow" />
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center">

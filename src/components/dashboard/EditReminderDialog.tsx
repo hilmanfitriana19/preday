@@ -25,7 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Loader2, Calendar as CalendarIcon, MessageSquare, Tag, Sparkles, Info } from 'lucide-react';
+import { Loader2, Calendar as CalendarIcon, MessageSquare, Tag, Sparkles, Info, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -35,6 +35,7 @@ const getMinDate = () => addDays(startOfToday(), 2);
 const formSchema = z.object({
   message: z.string().min(1, 'Message is required'),
   category: z.enum(['Personal', 'Bill', 'Work', 'Urgent']),
+  repeat_type: z.enum(['none', 'daily', 'weekly', 'monthly', 'yearly']),
   event_date: z.date({
     message: 'Target date is required',
   }).refine((date) => {
@@ -50,6 +51,8 @@ interface Reminder {
   category?: 'Personal' | 'Bill' | 'Work' | 'Urgent';
   scheduled_time: Timestamp | Date | string | null;
   event_date?: Timestamp | Date | string | null;
+  original_event_date?: Timestamp | Date | string | null;
+  repeat_type?: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
   is_sent: boolean;
 }
 
@@ -106,6 +109,7 @@ export function EditReminderDialog({ reminder, open, onOpenChange }: EditReminde
           .replace(/\*\*/g, '')
           .trim(),
         category: reminder.category || 'Personal',
+        repeat_type: reminder.repeat_type || 'none',
         event_date: eventDate,
       });
     }
@@ -157,6 +161,7 @@ export function EditReminderDialog({ reminder, open, onOpenChange }: EditReminde
       await updateDoc(doc(db, 'reminders', reminder.id), {
         message: values.message,
         category: values.category,
+        repeat_type: values.repeat_type,
         scheduled_time: Timestamp.fromDate(scheduledDateTime),
         event_date: Timestamp.fromDate(eventDate),
         is_sent: false, // Revert to pending
@@ -287,6 +292,31 @@ export function EditReminderDialog({ reminder, open, onOpenChange }: EditReminde
                 />
               </div>
 
+              <FormField
+                control={form.control}
+                name="repeat_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
+                      <RefreshCw className="h-3 w-3" /> Recurrence
+                    </FormLabel>
+                    <FormControl>
+                      <select 
+                        {...field}
+                        className="flex h-12 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm appearance-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary text-foreground"
+                      >
+                        <option value="none">None (One-time)</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <div className="space-y-3">
                 <div className={cn(
                   "p-4 rounded-xl border border-dashed transition-colors text-foreground bg-accent/50 border-border"
@@ -315,10 +345,35 @@ export function EditReminderDialog({ reminder, open, onOpenChange }: EditReminde
               </div>
             </div>
 
-            <DialogFooter className="pt-6">
+            <DialogFooter className="pt-6 flex flex-col gap-3 sm:flex-col">
               <Button type="submit" disabled={loading} className="w-full h-12 rounded-xl text-md font-bold bg-primary hover:opacity-90 transition-all border-none text-primary-foreground">
                 {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Update Reminder"}
               </Button>
+              {reminder?.repeat_type && reminder.repeat_type !== 'none' && (
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  disabled={loading}
+                  onClick={async () => {
+                    if (!reminder) return;
+                    setLoading(true);
+                    try {
+                      await updateDoc(doc(db, 'reminders', reminder.id), {
+                        repeat_type: 'none'
+                      });
+                      toast.success('Series stopped. This alert will not repeat.');
+                      onOpenChange(false);
+                    } catch {
+                      toast.error('Failed to stop series');
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="w-full h-12 rounded-xl text-md font-bold border-rose-500/20 text-rose-500 hover:bg-rose-500/5 transition-all"
+                >
+                  Stop Series
+                </Button>
+              )}
             </DialogFooter>
           </form>
         </Form>

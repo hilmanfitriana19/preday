@@ -27,7 +27,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { BellPlus, Loader2, Calendar as CalendarIcon, MessageSquare, Tag, Sparkles, Info } from 'lucide-react';
+import { BellPlus, Loader2, Calendar as CalendarIcon, MessageSquare, Tag, Sparkles, Info, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -37,6 +37,7 @@ const getMinDate = () => addDays(startOfToday(), 2);
 const formSchema = z.object({
   message: z.string().min(1, 'Message is required'),
   category: z.enum(['Personal', 'Bill', 'Work', 'Urgent']),
+  repeat_type: z.enum(['none', 'daily', 'weekly', 'monthly', 'yearly']),
   event_date: z.date({
     message: 'Target date is required',
   }).refine((date) => {
@@ -58,6 +59,7 @@ export function CreateReminderDialog() {
     defaultValues: {
       message: '',
       category: 'Personal',
+      repeat_type: 'none',
       event_date: minDate,
     },
   });
@@ -113,8 +115,10 @@ export function CreateReminderDialog() {
         user_id: user.user_id || user.chat_id,
         message: values.message,
         category: values.category,
+        repeat_type: values.repeat_type,
         scheduled_time: Timestamp.fromDate(scheduledDateTime),
         event_date: Timestamp.fromDate(eventDate),
+        original_event_date: Timestamp.fromDate(eventDate),
         is_sent: false,
         is_active: true,
         created_at: Timestamp.now(),
@@ -255,6 +259,31 @@ export function CreateReminderDialog() {
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="repeat_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.15em] text-[#A0A0A0]">
+                      <RefreshCw className="h-3 w-3" /> Recurrence
+                    </FormLabel>
+                    <FormControl>
+                      <select 
+                        {...field}
+                        className="flex h-12 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm appearance-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary text-foreground"
+                      >
+                        <option value="none">None (One-time)</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <div className="space-y-3">
                 <div className={cn(
