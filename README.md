@@ -27,32 +27,6 @@ Deployed at: [hyhilman.web.id/preday](https://hyhilman.web.id/preday)
 
 ---
 
-## 🚀 Upcoming Improvements: Recurring Reminders (`repeat_type`)
-
-The next major evolution for PredaY is the implementation of **Recurring Reminders**. This will allow the system to handle monthly bills, weekly meetings, and yearly anniversaries automatically.
-
-### Proposed Implementation Area
-
-1. **Schema Update**:
-   - Add a `repeat_type` field to the `Reminder` model:
-     ```typescript
-     repeat_type: "none" | "daily" | "weekly" | "monthly" | "yearly";
-     ```
-
-2. **UI Integration**:
-   - Update `CreateReminderDialog` and `EditReminderDialog` to include a selection for repetition frequency.
-   - Refine the Dashboard to show a "Recurring" icon on list items.
-
-3. **Logic Layer**:
-   - Implement a post-processing hook in the backend/worker:
-     - When a reminder is marked as `is_sent: true`, if `repeat_type !== 'none'`, automatically calculate the next `event_date` and `scheduled_time`.
-     - Create a new "Pending" reminder document for the next cycle.
-
-4. **User Control**:
-   - Allow users to "Stop Series" directly from the dashboard actions.
-
----
-
 ## 🛠️ Getting Started
 
 First, install dependencies:

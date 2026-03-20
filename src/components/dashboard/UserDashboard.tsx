@@ -10,12 +10,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { BellPlus, Trash2, Edit2, AlertTriangle, Pause, Bell, RefreshCw } from 'lucide-react';
+import { BellPlus, Trash2, Edit2, AlertTriangle, Pause, Bell, RefreshCw, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import TelegramLinkPrompt from './TelegramLinkPrompt';
 import { EditReminderDialog } from './EditReminderDialog';
+import { CreateReminderDialog } from './CreateReminderDialog';
 
 interface Reminder {
   id: string;
@@ -298,119 +299,202 @@ export default function UserDashboard({ initialTab = 'upcoming', onTabChange }: 
                     <BellPlus className="h-10 w-10 opacity-20" />
                   </div>
                   <div className="space-y-1">
-                    <p className="font-semibold text-foreground">No pending reminders</p>
-                    <p className="text-sm">Click &quot;Create Reminder&quot; to get started.</p>
+                    <p className="font-semibold text-foreground">Yo! No pending reminders</p>
+                    <p className="text-sm text-muted-foreground">Tap + to get your first alert ready.</p>
                   </div>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow className="hover:bg-transparent border-b border-border h-14">
-                      <TableHead className="px-8 text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Event Name</TableHead>
-                      <TableHead className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Category</TableHead>
-                      <TableHead className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Schedule</TableHead>
-                      <TableHead className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground w-[120px]">Active</TableHead>
-                      <TableHead className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Status</TableHead>
-                      <TableHead className="text-right px-8"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                <>
+                  {/* Desktop Table - Hidden on mobile */}
+                  <div className="hidden md:block">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="hover:bg-transparent border-b border-border h-14">
+                          <TableHead className="px-8 text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Event Name</TableHead>
+                          <TableHead className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Category</TableHead>
+                          <TableHead className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Schedule</TableHead>
+                          <TableHead className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground w-[120px]">Active</TableHead>
+                          <TableHead className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Status</TableHead>
+                          <TableHead className="text-right px-8"></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {pendingReminders.map((reminder) => {
+                          const { eventDate, relativeDate, alertDate } = getEventAndAlertDates(reminder);
+                          const isFuture = reminder.scheduled_time ? (reminder.scheduled_time instanceof Timestamp ? reminder.scheduled_time.toDate() : new Date(reminder.scheduled_time.toString())) > new Date() : false;
+                          
+                          return (
+                            <TableRow key={reminder.id} className="group border-b border-border/40 last:border-0 hover:bg-accent/5 dark:bg-[#1E1E1E]/50 dark:hover:bg-[#222223] transition-all h-24">
+                              <TableCell className="px-8">
+                                <div className="flex items-center gap-2">
+                                  <span 
+                                    className="font-bold text-[15px] text-foreground dark:text-white block truncate max-w-[180px]" 
+                                    title={cleanMessage(reminder.message)}
+                                  >
+                                    {cleanMessage(reminder.message)}
+                                  </span>
+                                  {reminder.repeat_type && reminder.repeat_type !== 'none' && (
+                                    <RefreshCw className="h-3.5 w-3.5 text-[#0088CC] animate-spin-slow" />
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center">
+                                  {getCategoryBadge(reminder.category)}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex flex-col gap-1.5 py-1">
+                                  <div className="flex items-center gap-2 group/time">
+                                    <div className="p-1.5 rounded-md bg-indigo-500/10 dark:bg-indigo-500/20">
+                                      <Bell className="h-3.5 w-3.5 text-indigo-500" />
+                                    </div>
+                                    <span className="text-[13px] font-bold tracking-tight text-foreground dark:text-white leading-none">
+                                      {alertDate}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2 ml-1">
+                                    <span className="text-[11px] font-medium text-muted-foreground/80">
+                                      Due: {eventDate}
+                                    </span>
+                                  </div>
+                                  <div className="mt-1">
+                                    <span className={cn(
+                                      "inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-[0.05em]",
+                                      isFuture 
+                                        ? "bg-cyan-500/10 text-cyan-500 dark:bg-cyan-500/20 dark:text-cyan-400" 
+                                        : "bg-rose-500/10 text-rose-500 dark:bg-rose-500/20 dark:text-rose-400"
+                                    )}>
+                                      {relativeDate}
+                                    </span>
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center justify-center w-[60px]">
+                                  <Switch 
+                                    checked={reminder.is_active !== false} 
+                                    onCheckedChange={() => handleToggleActive(reminder.id, reminder.is_active !== false)}
+                                    className={cn(
+                                      "h-5 w-9 transition-all duration-300",
+                                      reminder.is_active !== false ? "data-[state=checked]:bg-[#0088CC] glow-switch" : "bg-muted"
+                                    )}
+                                  />
+                                </div>
+                              </TableCell>
+                              <TableCell>{getStatusBadge(reminder)}</TableCell>
+                              <TableCell className="text-right px-8">
+                                <div className="flex items-center justify-end gap-1">
+                                  <div className="action-hover-circle">
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      className="h-8 w-8 text-muted-foreground/60 hover:text-indigo-500 transition-colors z-10"
+                                      onClick={() => {
+                                        setEditingReminder(reminder);
+                                        setShowEditDialog(true);
+                                      }}
+                                    >
+                                      <Edit2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                  <div className="action-hover-circle">
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      className="h-8 w-8 text-muted-foreground/60 hover:text-rose-500 transition-colors z-10"
+                                      onClick={() => handleDelete(reminder.id)}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* Mobile Cards - Shown only on mobile */}
+                  <div className="block md:hidden divide-y divide-border/40">
                     {pendingReminders.map((reminder) => {
-                      const { eventDate, relativeDate, alertDate } = getEventAndAlertDates(reminder);
+                      const { eventDate, alertDate, relativeDate } = getEventAndAlertDates(reminder);
                       const isFuture = reminder.scheduled_time ? (reminder.scheduled_time instanceof Timestamp ? reminder.scheduled_time.toDate() : new Date(reminder.scheduled_time.toString())) > new Date() : false;
                       
                       return (
-                        <TableRow key={reminder.id} className="group border-b border-border/40 last:border-0 hover:bg-accent/5 dark:bg-[#1E1E1E]/50 dark:hover:bg-[#222223] transition-all h-24">
-                          <TableCell className="px-8">
-                            <div className="flex items-center gap-2">
-                              <span 
-                                className="font-bold text-[15px] text-foreground dark:text-white block truncate max-w-[180px]" 
-                                title={cleanMessage(reminder.message)}
-                              >
-                                {cleanMessage(reminder.message)}
-                              </span>
-                              {reminder.repeat_type && reminder.repeat_type !== 'none' && (
-                                <RefreshCw className="h-3.5 w-3.5 text-[#0088CC] animate-spin-slow" />
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center">
-                              {getCategoryBadge(reminder.category)}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col gap-1.5 py-1">
-                              <div className="flex items-center gap-2 group/time">
-                                <div className="p-1.5 rounded-md bg-indigo-500/10 dark:bg-indigo-500/20">
-                                  <Bell className="h-3.5 w-3.5 text-indigo-500" />
-                                </div>
-                                <span className="text-[13px] font-bold tracking-tight text-foreground dark:text-white leading-none">
-                                  {alertDate}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2 ml-1">
-                                <span className="text-[11px] font-medium text-muted-foreground/80">
-                                  Due: {eventDate}
-                                </span>
-                              </div>
-                              <div className="mt-1">
-                                <span className={cn(
-                                  "inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-[0.05em]",
-                                  isFuture 
-                                    ? "bg-cyan-500/10 text-cyan-500 dark:bg-cyan-500/20 dark:text-cyan-400" 
-                                    : "bg-rose-500/10 text-rose-500 dark:bg-rose-500/20 dark:text-rose-400"
-                                )}>
-                                  {relativeDate}
-                                </span>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center justify-center w-[60px]">
+                        <div key={reminder.id} className="p-5 space-y-4 active:bg-accent/5 transition-colors">
+                          <div className="flex items-center justify-between">
+                            {getCategoryBadge(reminder.category)}
+                            <div className="flex items-center gap-3">
                               <Switch 
                                 checked={reminder.is_active !== false} 
                                 onCheckedChange={() => handleToggleActive(reminder.id, reminder.is_active !== false)}
                                 className={cn(
-                                  "h-5 w-9 transition-all duration-300",
-                                  reminder.is_active !== false ? "data-[state=checked]:bg-[#0088CC] glow-switch" : "bg-muted"
+                                  "h-5 w-9",
+                                  reminder.is_active !== false ? "data-[state=checked]:bg-[#0088CC]" : "bg-muted"
                                 )}
                               />
                             </div>
-                          </TableCell>
-                          <TableCell>{getStatusBadge(reminder)}</TableCell>
-                          <TableCell className="text-right px-8">
-                            <div className="flex items-center justify-end gap-1">
-                              <div className="action-hover-circle">
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  className="h-8 w-8 text-muted-foreground/60 hover:text-indigo-500 transition-colors z-10"
-                                  onClick={() => {
-                                    setEditingReminder(reminder);
-                                    setShowEditDialog(true);
-                                  }}
-                                >
-                                  <Edit2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                              <div className="action-hover-circle">
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  className="h-8 w-8 text-muted-foreground/60 hover:text-rose-500 transition-colors z-10"
-                                  onClick={() => handleDelete(reminder.id)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
+                          </div>
+                          
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-lg font-bold text-foreground leading-tight tracking-tight">
+                                {cleanMessage(reminder.message)}
+                              </h3>
+                              {reminder.repeat_type && reminder.repeat_type !== 'none' && (
+                                <RefreshCw className="h-4 w-4 text-[#0088CC]" />
+                              )}
                             </div>
-                          </TableCell>
-                        </TableRow>
+                            <div className="flex items-center gap-2">
+                              {getStatusBadge(reminder)}
+                              <span className={cn(
+                                "inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-[0.05em]",
+                                isFuture ? "bg-cyan-500/10 text-cyan-500" : "bg-rose-500/10 text-rose-500"
+                              )}>
+                                {relativeDate}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-accent/30 border border-border/50">
+                            <div className="flex items-center gap-2">
+                              <Bell className="h-3.5 w-3.5 text-primary" />
+                              <span className="text-[13px] font-bold text-foreground">
+                                {alertDate}
+                              </span>
+                            </div>
+                            <span className="text-[11px] font-medium text-muted-foreground ml-5">
+                              Due: {eventDate}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2 pt-1">
+                            <Button 
+                              variant="outline" 
+                              className="flex-1 h-11 rounded-xl text-sm font-bold border-border bg-background"
+                              onClick={() => {
+                                setEditingReminder(reminder);
+                                setShowEditDialog(true);
+                              }}
+                            >
+                              <Edit2 className="h-4 w-4 mr-2" /> Edit
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              className="h-11 w-11 rounded-xl border-border bg-background text-rose-500 hover:text-rose-600"
+                              onClick={() => handleDelete(reminder.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
                       );
                     })}
-                  </TableBody>
-                </Table>
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>
@@ -422,50 +506,92 @@ export default function UserDashboard({ initialTab = 'upcoming', onTabChange }: 
               {historyReminders.length === 0 ? (
                 <div className="text-center py-20 text-muted-foreground">No history items yet.</div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow className="hover:bg-transparent border-b border-border h-14">
-                      <TableHead className="px-8 text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Event Name</TableHead>
-                      <TableHead className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Schedule Date</TableHead>
-                      <TableHead className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                <>
+                  <div className="hidden md:block">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="hover:bg-transparent border-b border-border h-14">
+                          <TableHead className="px-8 text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Event Name</TableHead>
+                          <TableHead className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Schedule Date</TableHead>
+                          <TableHead className="text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {historyReminders.map((reminder) => {
+                          const { eventDate, alertDate } = getEventAndAlertDates(reminder);
+                          return (
+                            <TableRow key={reminder.id} className="group border-b border-border/40 last:border-0 hover:bg-accent/5 dark:bg-[#161617]/50 transition-all h-20">
+                              <TableCell className="px-8">
+                                <span 
+                                  className="font-bold text-sm text-muted-foreground block truncate max-w-[200px]" 
+                                  title={cleanMessage(reminder.message)}
+                                >
+                                  {cleanMessage(reminder.message)}
+                                </span>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex flex-col gap-1 py-1">
+                                  <div className="flex items-center gap-2 group/time opacity-70">
+                                    <Bell className="h-3 w-3 text-muted-foreground/50" />
+                                    <span className="text-[12px] font-medium text-muted-foreground">
+                                      {alertDate}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2 ml-1 opacity-50">
+                                    <span className="text-[10px] font-medium text-muted-foreground">
+                                      Due: {eventDate}
+                                    </span>
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {getStatusBadge(reminder)}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  
+                  {/* Mobile History Cards */}
+                  <div className="block md:hidden divide-y divide-border/40">
                     {historyReminders.map((reminder) => {
                       const { eventDate, alertDate } = getEventAndAlertDates(reminder);
+                      const status = getReminderStatus(reminder);
                       return (
-                        <TableRow key={reminder.id} className="group border-b border-border/40 last:border-0 hover:bg-accent/5 dark:bg-[#161617]/50 transition-all h-20">
-                          <TableCell className="px-8">
-                            <span 
-                              className="font-bold text-sm text-muted-foreground block truncate max-w-[200px]" 
-                              title={cleanMessage(reminder.message)}
-                            >
-                              {cleanMessage(reminder.message)}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col gap-1 py-1">
-                              <div className="flex items-center gap-2 group/time opacity-70">
-                                <Bell className="h-3 w-3 text-muted-foreground/50" />
-                                <span className="text-[12px] font-medium text-muted-foreground">
-                                  {alertDate}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2 ml-1 opacity-50">
-                                <span className="text-[10px] font-medium text-muted-foreground">
-                                  Due: {eventDate}
-                                </span>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
+                        <div key={reminder.id} className="p-5 space-y-4">
+                          <div className="flex items-center justify-between">
+                            {getCategoryBadge(reminder.category)}
                             {getStatusBadge(reminder)}
-                          </TableCell>
-                        </TableRow>
+                          </div>
+                          <h3 className="text-md font-bold text-muted-foreground/80 leading-tight">
+                            {cleanMessage(reminder.message)}
+                          </h3>
+                          <div className="flex flex-col gap-1 opacity-70">
+                            <div className="flex items-center gap-2">
+                              <Bell className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-xs font-medium text-muted-foreground">{alertDate}</span>
+                            </div>
+                            <span className="text-[10px] text-muted-foreground ml-5">Due: {eventDate}</span>
+                          </div>
+                          {status === 'Expired' && (
+                            <Button 
+                              variant="outline" 
+                              className="w-full h-11 rounded-xl text-sm font-bold border-primary/20 text-primary hover:bg-primary/5"
+                              onClick={() => {
+                                setEditingReminder(reminder);
+                                setShowEditDialog(true);
+                              }}
+                            >
+                              Reschedule Alert
+                            </Button>
+                          )}
+                        </div>
                       );
                     })}
-                  </TableBody>
-                </Table>
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>
@@ -477,6 +603,20 @@ export default function UserDashboard({ initialTab = 'upcoming', onTabChange }: 
         open={showEditDialog} 
         onOpenChange={setShowEditDialog} 
       />
+
+      {/* Floating Action Button for Mobile */}
+      <div className="fixed bottom-6 right-6 z-50 md:hidden">
+        <CreateReminderDialog 
+          trigger={
+            <Button 
+              size="icon" 
+              className="h-14 w-14 rounded-full shadow-2xl bg-[#0088CC] hover:bg-[#0088CC]/90 transition-transform active:scale-90 border-none"
+            >
+              <Plus className="h-7 w-7 text-white" />
+            </Button>
+          }
+        />
+      </div>
     </div>
   );
 }

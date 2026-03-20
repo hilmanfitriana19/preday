@@ -17,7 +17,7 @@ const navItems = [
 
 export function Sidebar({ activeView, onViewChange }: SidebarProps) {
   return (
-    <aside className="w-64 border-r border-border bg-sidebar h-screen sticky top-0 flex flex-col transition-colors duration-300">
+    <aside className="hidden md:flex w-64 border-r border-border bg-sidebar h-screen sticky top-0 flex-col transition-colors duration-300">
       <div className="p-6 flex items-center gap-3">
         <div className="h-10 w-10 flex items-center justify-center">
           <Image 

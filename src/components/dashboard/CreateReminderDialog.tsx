@@ -47,7 +47,7 @@ const formSchema = z.object({
   }),
 });
 
-export function CreateReminderDialog() {
+export function CreateReminderDialog({ trigger }: { trigger?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
@@ -140,15 +140,19 @@ export function CreateReminderDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button 
-          disabled={!user?.chat_id}
-          className="rounded-xl px-6 h-11 bg-gradient-to-r from-[#0088CC] to-[#00AEEF] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-[#0088CC]/20 border-none text-white font-bold flex items-center gap-2 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
-        >
-          <BellPlus className="h-4 w-4" />
-          {user?.chat_id ? "Create Reminder" : "Connect Telegram to Add"}
-        </Button>
+        {trigger ? (
+          trigger
+        ) : (
+          <Button 
+            disabled={!user?.chat_id}
+            className="rounded-xl px-6 h-11 bg-gradient-to-r from-[#0088CC] to-[#00AEEF] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-[#0088CC]/20 border-none text-white font-bold flex items-center gap-2 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
+          >
+            <BellPlus className="h-4 w-4" />
+            {user?.chat_id ? "Create Reminder" : "Connect Telegram to Add"}
+          </Button>
+        )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[480px] border-border shadow-2xl bg-card/95 backdrop-blur-2xl p-0 overflow-hidden rounded-2xl">
+      <DialogContent className="w-full sm:max-w-[480px] h-[100dvh] sm:h-auto border-border shadow-2xl bg-card/95 backdrop-blur-2xl p-0 overflow-hidden rounded-none sm:rounded-2xl gap-0 flex flex-col">
         <div className="bg-primary/5 px-8 pt-8 pb-6 border-b border-border">
           <DialogHeader>
             <div className="h-12 w-12 rounded-2xl bg-primary/20 flex items-center justify-center mb-4 border border-primary/30">
@@ -160,7 +164,7 @@ export function CreateReminderDialog() {
             </DialogDescription>
           </DialogHeader>
         </div>
-        <div className="px-8 py-8">
+        <div className="flex-1 overflow-y-auto px-8 py-8 custom-scrollbar">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-6">
             <div className="space-y-4">

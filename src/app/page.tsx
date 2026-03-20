@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Login from '@/components/auth/Login';
 import AdminDashboard from '@/components/dashboard/AdminDashboard';
@@ -14,16 +14,13 @@ import ProfileView from '@/components/dashboard/ProfileView';
 export default function Home() {
   const { user, loading } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
-  const [showDashboard, setShowDashboard] = useState(false);
-  const [activeView, setActiveView] = useState('dashboard');
-
-  // Check for persisted view preference on mount
-  useEffect(() => {
-    const savedView = localStorage.getItem('preday_view');
-    if (savedView === 'dashboard') {
-      setShowDashboard(true);
+  const [showDashboard, setShowDashboard] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('preday_view') === 'dashboard';
     }
-  }, []);
+    return false;
+  });
+  const [activeView, setActiveView] = useState('dashboard');
 
   const handleEnterDashboard = () => {
     setShowDashboard(true);
@@ -68,7 +65,7 @@ export default function Home() {
       <Sidebar activeView={activeView} onViewChange={setActiveView} />
       <div className="flex-1 flex flex-col min-w-0">
         <Header />
-        <main className="flex-1 px-8 py-8 w-full max-w-7xl mx-auto">
+        <main className="flex-1 px-4 md:px-8 py-6 md:py-8 w-full max-w-7xl mx-auto">
           {user.role === 'admin' ? (
             <AdminDashboard />
           ) : activeView === 'profile' ? (

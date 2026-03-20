@@ -35,7 +35,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-xl border-b border-border transition-colors duration-300">
-      <div className="flex h-20 items-center justify-between px-8">
+      <div className="flex h-20 items-center justify-between px-4 md:px-8">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 flex items-center justify-center">
             <Image 
