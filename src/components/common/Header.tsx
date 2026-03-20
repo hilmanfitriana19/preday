@@ -68,8 +68,8 @@ export default function Header() {
             )}
             
             {user && (
-              <div className="flex items-center gap-4 ml-2 pl-4 border-l border-border h-8">
-                <div className="flex flex-col items-end">
+              <div className="flex items-center gap-2 md:gap-4 md:ml-2 md:pl-4 md:border-l md:border-border h-8">
+                <div className="hidden md:flex flex-col items-end">
                   <span className="text-[11px] font-bold text-foreground leading-tight">Logged in as</span>
                   <span className="text-[11px] text-muted-foreground leading-tight">{user.email}</span>
                 </div>
