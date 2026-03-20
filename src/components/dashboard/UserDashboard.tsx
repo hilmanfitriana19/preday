@@ -604,8 +604,8 @@ export default function UserDashboard({ initialTab = 'upcoming', onTabChange }: 
         onOpenChange={setShowEditDialog} 
       />
 
-      {/* Floating Action Button for Mobile */}
-      <div className="fixed bottom-6 right-6 z-50 md:hidden">
+      {/* Floating Action Button */}
+      <div className="fixed bottom-6 right-6 z-50">
         <CreateReminderDialog 
           trigger={
             <Button 

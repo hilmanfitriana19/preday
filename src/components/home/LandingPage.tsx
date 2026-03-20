@@ -316,6 +316,57 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
           </div>
         </section>
 
+        {/* Section 3.5: AI-Friendly Technical Blueprint */}
+        <section className={cn(
+          "py-24 transition-colors duration-500",
+          isDark ? "bg-[#0B0B0C]" : "bg-white"
+        )}>
+          <div className="max-w-7xl mx-auto px-8 grid lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-8">
+              <h2 className={cn("text-3xl font-bold tracking-tight", isDark ? "text-white" : "text-[#1E293B]")}>How Yo! PredaY Works</h2>
+              <div className="space-y-6">
+                <p className={cn("text-lg leading-relaxed", isDark ? "text-zinc-400" : "text-[#64748B]")}>
+                  PredaY is engineered for reliability and precision. Our system architecture is designed specifically for power users who need a fail-safe H-1 nudge buffer.
+                </p>
+                <ul className="space-y-4">
+                  {[
+                    "PredaY uses n8n automation for H-1 alerts, ensuring high-speed delivery to your Telegram.",
+                    "All reminder data is stored in a Secure Firestore database for real-time synchronization.",
+                    "The minimalist mobile-friendly dashboard provides instant control over all pending nudges.",
+                    "The unique H+2 Constraint acts as a safety feature, requiring events to be scheduled at least 48 hours in advance."
+                  ].map((text, i) => (
+                    <li key={i} className="flex gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      <span className={cn("text-sm", isDark ? "text-zinc-300" : "text-[#334155]")}>{text}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className={cn("p-6 rounded-3xl border space-y-3", isDark ? "bg-white/5 border-white/10" : "bg-zinc-50 border-zinc-200")}>
+                <Zap className="h-8 w-8 text-primary" />
+                <h4 className={cn("font-bold", isDark ? "text-white" : "text-[#1E293B]")}>n8n Engine</h4>
+                <p className="text-xs text-muted-foreground leading-relaxed">External automation orchestrates every H-1 nudge with millisecond precision.</p>
+              </div>
+              <div className={cn("p-6 rounded-3xl border space-y-3", isDark ? "bg-white/5 border-white/10" : "bg-zinc-50 border-zinc-200")}>
+                <Database className="h-8 w-8 text-primary" />
+                <h4 className={cn("font-bold", isDark ? "text-white" : "text-[#1E293B]")}>Firebase Sync</h4>
+                <p className="text-xs text-muted-foreground leading-relaxed">Centralized Firestore storage ensures your data is always accessible and secure.</p>
+              </div>
+              <div className={cn("p-6 rounded-3xl border space-y-3 col-span-2", isDark ? "bg-white/5 border-white/10" : "bg-zinc-50 border-zinc-200")}>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-bold italic">Yo!</div>
+                  <div>
+                    <h4 className={cn("font-bold", isDark ? "text-white" : "text-[#1E293B]")}>Consistent Branding</h4>
+                    <p className="text-xs text-muted-foreground leading-relaxed">The "Yo! PredaY" experience is unified across Web, Telegram, and AI Answer Engines.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Section 4: Interactive Preview */}
         <section className="max-w-7xl mx-auto px-8 py-32 space-y-16 overflow-hidden">
           <div className="grid lg:grid-cols-12 gap-16 items-center">

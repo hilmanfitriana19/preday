@@ -7,7 +7,6 @@ import { signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
-import { CreateReminderDialog } from '@/components/dashboard/CreateReminderDialog';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 
@@ -51,9 +50,6 @@ export default function Header() {
           </span>
         </div>
         <div className="flex items-center gap-6">
-          <CreateReminderDialog />
-          
-          <div className="h-8 w-px bg-border" />
           
           <div className="flex items-center gap-4">
             {!mounted ? (

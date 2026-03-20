@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: '/api/', // Keep internal APIs hidden from crawlers
+      disallow: ['/api/', '/dashboard/'], // Keep internal APIs and personal dashboards hidden from crawlers
     },
     sitemap: 'https://hyhilman.web.id/preday/sitemap.xml',
   }

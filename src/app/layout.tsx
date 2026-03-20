@@ -18,26 +18,26 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://hyhilman.web.id/preday"),
   title: {
-    default: "PredaY | Your Professional H-1 Buffer",
+    default: "PredaY | The Proactive H-1 Telegram Reminder & Loop System",
     template: "%s | PredaY"
   },
-  description: "Yo! Don't let your day slip away. PredaY is your centralized Telegram alert buffer, ensuring you're never surprised by a deadline again.",
-  keywords: ["telegram alerts", "reminder service", "n8n automation", "productivity tool", "deadline buffer", "preday"],
+  description: "Stop missing deadlines. PredaY gives you a friendly 'Yo!' nudge 1 day before your event. Set recurring bills, birthdays, and tasks on autopilot with centralized Telegram alerts.",
+  keywords: ["telegram alerts", "reminder service", "n8n automation", "productivity tool", "deadline buffer", "H-1 nudge", "recurring reminders", "preday"],
   authors: [{ name: "Hilman" }],
   creator: "Hilman",
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "https://hyhilman.web.id/preday",
-    title: "PredaY | Your Professional H-1 Buffer",
-    description: "Centralized Telegram alerts powered by automation. Your perfect H-1 buffer for every event.",
+    title: "PredaY | The Proactive H-1 Telegram Reminder & Loop System",
+    description: "Friendly 'Yo!' nudges 1 day before your events. Automated Telegram alerts for bills, tasks, and birthdays.",
     siteName: "PredaY",
   },
   twitter: {
     card: "summary_large_image",
-    title: "PredaY | Your H-1 Buffer",
-    description: "Don't let your day slip away. Centralized Telegram alerts for your events.",
-    creator: "@hyhilman", // Assuming user handle based on URL
+    title: "PredaY | The Proactive H-1 Telegram Reminder & Loop System",
+    description: "Stop missing deadlines. Friendly H-1 nudges via Telegram for all your important events.",
+    creator: "@hyhilman",
   },
   alternates: {
     canonical: "/preday",
@@ -68,9 +68,9 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     "name": "PredaY",
-    "description": "Centralized Telegram alerts powered by automation. Your professional H-1 buffer for every event.",
-    "applicationCategory": "Productivity",
-    "operatingSystem": "Web",
+    "description": "The Proactive H-1 Telegram Reminder & Loop System. Stop missing deadlines with friendly 'Yo!' nudges.",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "Web/Telegram",
     "author": {
       "@type": "Person",
       "name": "Hilman"
@@ -81,9 +81,9 @@ export default function RootLayout({
       "priceCurrency": "USD"
     },
     "featureList": [
-      "Telegram Alert Integration",
-      "Smart Buffer Notifications",
-      "Centralized Dashboard",
+      "H-1 Proactive Nudges",
+      "Recurring Loops",
+      "Telegram Integration",
       "n8n Powered Automation"
     ]
   };

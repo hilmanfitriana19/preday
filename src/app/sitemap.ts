@@ -8,11 +8,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 1,
     },
-    {
-      url: 'https://hyhilman.web.id/preday/dashboard',
-      lastModified: new Date(),
-      changeFrequency: 'always', // Dashboard state changes frequently for users
-      priority: 0.8,
-    },
   ]
 }
