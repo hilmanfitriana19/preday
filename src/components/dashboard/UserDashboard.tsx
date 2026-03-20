@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { BellPlus, Trash2, Edit2, AlertTriangle, Pause, Bell, RefreshCw, Plus } from 'lucide-react';
+import { BellPlus, Trash2, Edit2, AlertTriangle, Pause, Bell, RefreshCw, Plus, Clock, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -30,7 +30,6 @@ interface Reminder {
   is_active: boolean;
   created_at?: Timestamp | Date | string;
 }
-
 interface UserDashboardProps {
   initialTab?: string;
   onTabChange?: (tab: string) => void;
@@ -40,6 +39,9 @@ export default function UserDashboard({ initialTab = 'upcoming', onTabChange }: 
   const { user } = useAuth();
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [pullDistance, setPullDistance] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
 
@@ -86,7 +88,10 @@ export default function UserDashboard({ initialTab = 'upcoming', onTabChange }: 
     }
   };
 
-  const cleanMessage = (msg: string) => {
+  const cleanTitle = (msg: string) => {
+    const match = msg.match(/\*\*(.*?)\*\*/);
+    if (match) return match[1];
+    
     return msg
       .replace(/✅? ?Reminder set for \*\*/g, '')
       .replace(/✅? ?Reminder: \*\*/g, '')
@@ -263,11 +268,61 @@ export default function UserDashboard({ initialTab = 'upcoming', onTabChange }: 
     return null;
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (window.scrollY === 0) {
+      setTouchStart(e.targetTouches[0].clientY);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStart === 0) return;
+    const currentY = e.targetTouches[0].clientY;
+    const distance = currentY - touchStart;
+    
+    if (distance > 0 && window.scrollY === 0) {
+      setPullDistance(Math.min(distance * 0.5, 80)); // Resistance
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (pullDistance > 60) {
+      handleRefresh();
+    }
+    setTouchStart(0);
+    setPullDistance(0);
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    // Data updates automatically via onSnapshot, but we show feedback
+    setTimeout(() => {
+      setRefreshing(false);
+      toast.success("Dashboard updated!");
+    }, 800);
+  };
+
   if (loading) return <div className="p-8">Loading reminders...</div>;
   if (!user?.chat_id) return <TelegramLinkPrompt />;
 
   return (
-    <div className="space-y-8">
+    <div 
+      className="space-y-8 relative"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Pull-to-refresh Indicator */}
+      <div 
+        className="fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-200 pointer-events-none"
+        style={{ 
+          transform: `translate(-50%, ${pullDistance}px)`,
+          opacity: pullDistance > 20 ? 1 : 0
+        }}
+      >
+        <div className="bg-[#0088CC] shadow-xl rounded-full p-2 text-white border border-white/20">
+          <RefreshCw className={cn("h-5 w-5", (refreshing || pullDistance > 60) && "animate-spin")} />
+        </div>
+      </div>
       <Tabs 
         value={initialTab} 
         onValueChange={onTabChange}
@@ -329,9 +384,9 @@ export default function UserDashboard({ initialTab = 'upcoming', onTabChange }: 
                                 <div className="flex items-center gap-2">
                                   <span 
                                     className="font-bold text-[15px] text-foreground dark:text-white block truncate max-w-[180px]" 
-                                    title={cleanMessage(reminder.message)}
+                                    title={cleanTitle(reminder.message)}
                                   >
-                                    {cleanMessage(reminder.message)}
+                                    {cleanTitle(reminder.message)}
                                   </span>
                                   {reminder.repeat_type && reminder.repeat_type !== 'none' && (
                                     <RefreshCw className="h-3.5 w-3.5 text-[#0088CC] animate-spin-slow" />
@@ -442,7 +497,7 @@ export default function UserDashboard({ initialTab = 'upcoming', onTabChange }: 
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               <h3 className="text-lg font-bold text-foreground leading-tight tracking-tight">
-                                {cleanMessage(reminder.message)}
+                                {cleanTitle(reminder.message)}
                               </h3>
                               {reminder.repeat_type && reminder.repeat_type !== 'none' && (
                                 <RefreshCw className="h-4 w-4 text-[#0088CC]" />
@@ -461,14 +516,15 @@ export default function UserDashboard({ initialTab = 'upcoming', onTabChange }: 
 
                           <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-accent/30 border border-border/50">
                             <div className="flex items-center gap-2">
-                              <Bell className="h-3.5 w-3.5 text-primary" />
-                              <span className="text-[13px] font-bold text-foreground">
+                              <Clock className="h-3.5 w-3.5 text-indigo-400" />
+                              <span className="text-[13px] font-semibold text-indigo-400">
                                 {alertDate}
                               </span>
                             </div>
-                            <span className="text-[11px] font-medium text-muted-foreground ml-5">
+                            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 italic ml-5">
+                              <Calendar className="h-3 w-3" />
                               Due: {eventDate}
-                            </span>
+                            </div>
                           </div>
 
                           <div className="flex items-center gap-2 pt-1">
@@ -524,9 +580,9 @@ export default function UserDashboard({ initialTab = 'upcoming', onTabChange }: 
                               <TableCell className="px-8">
                                 <span 
                                   className="font-bold text-sm text-muted-foreground block truncate max-w-[200px]" 
-                                  title={cleanMessage(reminder.message)}
+                                  title={cleanTitle(reminder.message)}
                                 >
-                                  {cleanMessage(reminder.message)}
+                                  {cleanTitle(reminder.message)}
                                 </span>
                               </TableCell>
                               <TableCell>
@@ -566,14 +622,17 @@ export default function UserDashboard({ initialTab = 'upcoming', onTabChange }: 
                             {getStatusBadge(reminder)}
                           </div>
                           <h3 className="text-md font-bold text-muted-foreground/80 leading-tight">
-                            {cleanMessage(reminder.message)}
+                            {cleanTitle(reminder.message)}
                           </h3>
-                          <div className="flex flex-col gap-1 opacity-70">
+                          <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-accent/30 border border-border/50 opacity-80">
                             <div className="flex items-center gap-2">
-                              <Bell className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-xs font-medium text-muted-foreground">{alertDate}</span>
+                              <Clock className="h-3.5 w-3.5 text-indigo-400" />
+                              <span className="text-[13px] font-semibold text-indigo-400">{alertDate}</span>
                             </div>
-                            <span className="text-[10px] text-muted-foreground ml-5">Due: {eventDate}</span>
+                            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 italic ml-5">
+                              <Calendar className="h-3 w-3" />
+                              Due: {eventDate}
+                            </div>
                           </div>
                           {status === 'Expired' && (
                             <Button 
@@ -605,12 +664,12 @@ export default function UserDashboard({ initialTab = 'upcoming', onTabChange }: 
       />
 
       {/* Floating Action Button */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-6 right-6 z-[100]">
         <CreateReminderDialog 
           trigger={
             <Button 
               size="icon" 
-              className="h-14 w-14 rounded-full shadow-2xl bg-[#0088CC] hover:bg-[#0088CC]/90 transition-transform active:scale-90 border-none"
+              className="h-14 w-14 rounded-full shadow-[0_0_20px_rgba(0,136,204,0.3)] bg-[#0088CC] hover:bg-[#0088CC]/90 transition-all hover:scale-110 active:scale-90 border-none z-[100]"
             >
               <Plus className="h-7 w-7 text-white" />
             </Button>
