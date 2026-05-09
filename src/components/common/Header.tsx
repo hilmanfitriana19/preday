@@ -9,11 +9,21 @@ import { Moon, Sun, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { Menu } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
+import { navItems } from '@/components/dashboard/Sidebar';
+import { cn } from '@/lib/utils';
 
-export default function Header() {
+interface HeaderProps {
+  activeView?: string;
+  onViewChange?: (view: string) => void;
+}
+
+export default function Header({ activeView, onViewChange }: HeaderProps) {
   const { setTheme, resolvedTheme } = useTheme();
   const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -36,18 +46,74 @@ export default function Header() {
     <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-xl border-b border-border transition-colors duration-300">
       <div className="flex h-20 items-center justify-between px-4 md:px-8">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 flex items-center justify-center">
-            <Image 
-              src="/preday/logo.png" 
-              alt="PredaY Logo" 
-              width={40} 
-              height={40} 
-              className="object-contain"
-            />
+          {/* Mobile Menu Trigger */}
+          {user && onViewChange && (
+            <div className="md:hidden">
+              <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground">
+                    <Menu className="h-6 w-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[280px] p-0 border-r border-border bg-sidebar transition-colors duration-300">
+                  <div className="p-6 flex items-center gap-3 border-b border-border/50">
+                    <div className="h-10 w-10 flex items-center justify-center">
+                      <Image 
+                        src="/preday/logo.png" 
+                        alt="PredaY Logo" 
+                        width={40} 
+                        height={40} 
+                        className="object-contain"
+                      />
+                    </div>
+                    <SheetTitle className="font-bold text-lg tracking-tight text-foreground transition-colors px-1 text-left">PredaY</SheetTitle>
+                  </div>
+                  
+                  <nav className="flex-1 px-4 py-6 space-y-2">
+                    {navItems.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          onViewChange(item.id);
+                          setIsOpen(false);
+                        }}
+                        className={cn(
+                          "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group text-left",
+                          activeView === item.id 
+                            ? "bg-primary/10 text-primary" 
+                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        )}
+                      >
+                        <item.icon className={cn(
+                          "h-5 w-5 transition-transform duration-200 group-hover:scale-110",
+                          activeView === item.id ? "text-primary" : "text-muted-foreground"
+                        )} />
+                        <span className="font-medium">{item.label}</span>
+                        {activeView === item.id && (
+                          <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(0,136,204,0.6)]" />
+                        )}
+                      </button>
+                    ))}
+                  </nav>
+                </SheetContent>
+              </Sheet>
+            </div>
+          )}
+
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 flex items-center justify-center">
+              <Image 
+                src="/preday/logo.png" 
+                alt="PredaY Logo" 
+                width={40} 
+                height={40} 
+                className="object-contain"
+              />
+            </div>
+            <span className="font-bold text-2xl tracking-tight text-foreground">
+              PredaY
+            </span>
           </div>
-          <span className="font-bold text-2xl tracking-tight text-foreground">
-            PredaY
-          </span>
         </div>
         <div className="flex items-center gap-6">
           

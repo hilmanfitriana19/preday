@@ -9,7 +9,7 @@ interface SidebarProps {
   onViewChange: (view: string) => void;
 }
 
-const navItems = [
+export const navItems = [
   { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { id: 'history', icon: History, label: 'History' },
   { id: 'profile', icon: User, label: 'Profile' },
